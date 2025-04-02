@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    container_name: wallet_service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_URL=jdbc:postgresql://db:5432/walletdb
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - JAVA_OPTS=-Xmx768m -Xms512m
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wallet-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: wallet_db
+    environment:
+      - POSTGRES_DB=walletdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "54320:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Сохраняем данные БД между перезапусками контейнера
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d walletdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wallet-network
+    command: ["postgres", "-c", "max_connections=200"]
+
+networks:
+  wallet-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

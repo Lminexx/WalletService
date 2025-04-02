@@ -50,7 +50,7 @@
 
 1.  **Клонируйте репозиторий:**
     ```bash
-    git clone <url>
+    git clone <git@github.com:Lminexx/WalletService.git>
     cd walletService
     ```
 
